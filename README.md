@@ -12,8 +12,8 @@
 The Shortcut expansion allows to take content from TXT files, parse placeholders in them and return the final value. Useful for parsing of larger strings or as a workaround for very nested placeholders.
 
 ## Fork features
-- Automatic placeholder update
-- support of placeholders in parameters (with `{ }`)
+- Automatic placeholder update.
+- Support of placeholders in parameters (with `{ }`).
 ## How to use
 You first have to download the expansion from the eCloud. You can do so by running `/papi ecloud download shortcut` followed by `/papi reload` to register it.  
 This should create a `shortcut` folder located inside the `PlaceholderAPI` plugin folder.
