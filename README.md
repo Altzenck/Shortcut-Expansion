@@ -8,6 +8,7 @@
 </a>
 
 (Modified by Altzenck)
+
 The Shortcut expansion allows to take content from TXT files, parse placeholders in them and return the final value. Useful for parsing of larger strings or as a workaround for very nested placeholders.
 
 ## Fork features
