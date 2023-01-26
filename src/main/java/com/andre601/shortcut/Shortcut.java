@@ -16,138 +16,98 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.andre601.shortcut;
-
+package com.andre601.shortcut; 
 import com.andre601.shortcut.logger.LegacyLogger;
 import com.andre601.shortcut.logger.LoggerUtil;
 import com.andre601.shortcut.logger.NativeLogger;
-import me.clip.placeholderapi.PlaceholderAPI;
-import me.clip.placeholderapi.PlaceholderAPIPlugin;
-import me.clip.placeholderapi.expansion.Cacheable;
-import me.clip.placeholderapi.expansion.NMSVersion;
-import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.OfflinePlayer;
-
-import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.StringJoiner;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.StringJoiner;
+import javax.annotation.Nonnull;
+import me.clip.placeholderapi.PlaceholderAPI;
+import me.clip.placeholderapi.PlaceholderAPIPlugin;
+import me.clip.placeholderapi.expansion.NMSVersion;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.OfflinePlayer;
+ 
+//Modified by Altzenck
 
-public class Shortcut extends PlaceholderExpansion implements Cacheable{
-
-    private final File folder = new File(PlaceholderAPIPlugin.getInstance().getDataFolder() + "/shortcuts/");
-    private final Map<String, String> cache;
-    private final Pattern replacementPattern = Pattern.compile("\\{(\\d+)}");
-
-    public Shortcut(){
-        LoggerUtil logger = loadLogger();
-
-        if(folder.mkdirs())
-            logger.info("Created shortcuts folder.");
-
-        cache = new HashMap<>();
-    }
-
-    @Override
-    public @Nonnull String getIdentifier(){
-        return "shortcut";
-    }
-
-    @Override
-    public @Nonnull String getAuthor(){
-        return "Andre_601, Whitebrim";
-    }
-
-    @Override
-    public @Nonnull String getVersion(){
-        return "VERSION";
-    }
-    
-    @Override
-    public void clear(){
-        cache.clear();
-    }
-
-    @Override
-    public String onRequest(OfflinePlayer player, @Nonnull String params){
-        String[] values = params.split(":");
-        if(values.length == 0)
-            return null;
-
-        String filename = values[0].toLowerCase();
-        String rawText;
-
-        if(!cache.containsKey(filename)){
-            File file = new File(folder, filename + ".txt");
-            if(!file.exists())
-                return null;
-            
-            try(BufferedReader reader = Files.newBufferedReader(file.toPath())){
-                StringJoiner joiner = new StringJoiner("\n");
-                String line;
-                
-                while((line = reader.readLine()) != null)
-                    joiner.add(line);
-                
-                reader.close();
-                rawText = joiner.toString();
-            }catch(IOException ex){
-                rawText = null;
-            }
-            
-            if(rawText == null || rawText.isEmpty())
-                return null;
-            
-            cache.put(filename, rawText);
-        }else{
-            rawText = cache.get(filename);
-        }
-        
-        return parseReplacements(player, rawText, Arrays.copyOfRange(values, 1, values.length));
-    }
-    
-    private String parseReplacements(OfflinePlayer player, String text, String[] values){
-        if(values.length == 0)
-            return PlaceholderAPI.setPlaceholders(player, text);
-        
-        Matcher replacementMatcher = replacementPattern.matcher(text);
-        String newText = text;
-        
-        if(replacementMatcher.find()){
-            StringBuffer buffer = new StringBuffer();
-            
-            do{
-                int index;
-                try{
-                    index = Integer.parseInt(replacementMatcher.group(1));
-                }catch(NumberFormatException ex){
-                    continue;
-                }
-                
-                if(index < 0 || (index + 1) > values.length)
-                    continue;
-                
-                replacementMatcher.appendReplacement(buffer, values[index]);
-            }while(replacementMatcher.find());
-            
-            replacementMatcher.appendTail(buffer);
-            newText = buffer.toString();
-        }
-        
-        return PlaceholderAPI.setPlaceholders(player, newText);
-    }
-
-    private LoggerUtil loadLogger(){
-        if(NMSVersion.getVersion("v1_18_R1") != NMSVersion.UNKNOWN)
-            return new NativeLogger(this);
-
-        return new LegacyLogger();
-    }
-}
+ public class Shortcut
+   extends PlaceholderExpansion
+ {
+   private final File folder = new File(PlaceholderAPIPlugin.getInstance().getDataFolder() + "/shortcuts/");
+   public Shortcut() {
+     LoggerUtil logger = loadLogger();
+     
+     if (this.folder.mkdirs()) {
+       logger.info("Created shortcuts folder.");
+     }
+     new HashMap<>();
+   }
+   
+   @Nonnull
+   public String getIdentifier() {
+     return "shortcut";
+   }
+   
+   @Nonnull
+   public String getAuthor() {
+     return "Andre_601, Whitebrim";
+   }
+   
+   @Nonnull
+   public String getVersion() {
+     return "1.2.0";
+   }
+ 
+   
+   public String onRequest(OfflinePlayer player, @Nonnull String params) {
+     String rawText, values[] = params.split(":");
+     if (values.length <= 0) {
+       return null;
+     }
+     values[0] = PlaceholderAPI.setBracketPlaceholders(player, values[0]);
+     String filename = values[0].toLowerCase();
+ 
+     
+       File file = new File(this.folder, filename + ".txt");
+       if (!file.exists())
+         return null; 
+       
+       try { BufferedReader reader = Files.newBufferedReader(file.toPath()); 
+         try { StringJoiner joiner = new StringJoiner("\n");
+           
+           String line;
+           while ((line = reader.readLine()) != null) {
+             joiner.add(line);
+           }
+           reader.close();
+           rawText = joiner.toString();
+           if (reader != null) reader.close();  } catch (Throwable throwable) { if (reader != null) try { reader.close(); } catch (Throwable throwable1) { throwable.addSuppressed(throwable1); }   throw throwable; }  } catch (IOException ex)
+       { rawText = null; }
+ 
+       
+       if (rawText == null || rawText.isEmpty()) {
+         return null;
+       }
+     
+     if (values.length > 1) {
+       MessageFormat format = new MessageFormat(rawText.replace("'", "''"));
+       rawText = format.format(Arrays.copyOfRange(values, 1, values.length));
+     } 
+     
+     return PlaceholderAPI.setPlaceholders(player, rawText);
+   }
+   
+   private LoggerUtil loadLogger() {
+     if (NMSVersion.getVersion("v1_18_R1") != NMSVersion.UNKNOWN) {
+       return (LoggerUtil)new NativeLogger(this);
+     }
+     return (LoggerUtil)new LegacyLogger();
+   }
+ }
